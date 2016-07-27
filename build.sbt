@@ -2,13 +2,12 @@ name := "sparklify"
 
 version := "0.0.1"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.8"
 
 // additional libraries
 libraryDependencies ++= Seq(
-  "org.apache.spark" %% "spark-core" % "1.6.2" % "provided",
-  "org.apache.spark" %% "spark-sql" % "1.6.2",
-  "org.apache.spark" %% "spark-hive" % "1.6.2",
-  "org.apache.parquet" % "parquet-hadoop" % "1.6.2",
-  "org.apache.spark" % "spark-catalyst_2.10" % "1.6.2"
+  "org.apache.spark" %% "spark-core" % "2.0.0" % "provided",
+  "org.apache.spark" %% "spark-sql" % "2.0.0",
+  "org.apache.spark" %% "spark-hive" % "2.0.0",
+  "org.apache.spark" % "spark-catalyst_2.11" % "2.0.0"
 )
