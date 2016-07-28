@@ -26,17 +26,39 @@ object Sparklify {
     val triples = new NTripleReader(file).toSeq
     val graph = spark.sparkContext.parallelize(triples)
 
-    val schemaString = "subject predicate object"
-    val fields = schemaString.split(" ")
+    val spoTableSchemaString = "subject predicate object"
+    val spoTableFields = spoTableSchemaString.split(" ")
       .map(fieldName => StructField(fieldName, StringType, nullable = true))
-    val schema = StructType(fields)
-    val graphRow = graph.map {
-      case (subject, predicate, objectURI, "") => Row(subject, predicate, objectURI)
-      case (subject, predicate, "", objectLiteral) => Row(subject, predicate, objectLiteral)
+    val spoTableSchema = StructType(spoTableFields)
+
+    val spoTableRow = graph.filter(
+      tuple => tuple._4 == ""
+    ).map {
+      case (subject, predicate, objectURI, literal) => Row(subject, predicate, objectURI)
     }
 
-    val graphDF = spark.createDataFrame(graphRow, schema)
-    graphDF.write.mode("overwrite").saveAsTable("triples")
+    val spoTableDF = spark.createDataFrame(spoTableRow, spoTableSchema)
+    spoTableDF.write.mode("overwrite").saveAsTable("spo")
+
+
+    //val spltTableSchemaString = "subject predicate literal type"
+    val spltTableSchemaString = "subject predicate literal"
+    val spltTableFields = spltTableSchemaString.split(" ")
+      .map(fieldName => StructField(fieldName, StringType, nullable = true))
+    val spltTableSchema = StructType(spltTableFields)
+
+    //TODO: should be subject predicate literal type, for now keep type together with literal
+    val spltTableRow = graph.filter(
+      tuple => tuple._3 == ""
+    ).map {
+      case (subject, predicate, objectURI, objectLiteral) => (subject, predicate, objectLiteral)
+    }.map(
+      tuple => Row(tuple._1, tuple._2, tuple._3.split('"')(1))
+    )
+
+    //Create dataframes and save to DB
+    val spltTableDF = spark.createDataFrame(spltTableRow, spltTableSchema)
+    spltTableDF.write.mode("overwrite").saveAsTable("splt")
 
     //results.take(10).foreach(println)
     //println(graph.collect())
